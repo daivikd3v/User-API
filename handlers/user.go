@@ -3,7 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"regexp"
+
+	"github.com/gorilla/mux"
 
 	"github.com/daivikd3v/User-API/data"
 	"github.com/daivikd3v/User-API/util"
@@ -45,12 +46,7 @@ func (user User) post(w http.ResponseWriter, r *http.Request) {
 //Put updates an already existing user in memory from the request.
 func (user User) put(w http.ResponseWriter, r *http.Request) {
 
-	reg := regexp.MustCompile(`/put/([a-fA-F0-9\-]+)`)
-	g := reg.FindAllStringSubmatch(r.URL.Path, -1)
-	if len(g) != 1 {
-		util.RespondWithError(w, http.StatusBadRequest, "Invalid URI")
-		return
-	}
+	vars := mux.Vars(r)
 
 	u, err := unmarshal(r)
 
@@ -66,7 +62,7 @@ func (user User) put(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u.Uuid, err = guuid.Parse(g[0][1])
+	u.Uuid, err = guuid.Parse(vars["uuid"])
 
 	if err != nil {
 		util.RespondWithError(w, http.StatusBadRequest, "Invalid UUID")
@@ -85,17 +81,12 @@ func (user User) put(w http.ResponseWriter, r *http.Request) {
 
 //Delete deletes a user from UUID in the request
 func (user User) delete(w http.ResponseWriter, r *http.Request) {
-	reg := regexp.MustCompile(`/delete/([a-fA-F0-9\-]+)`)
-	g := reg.FindAllStringSubmatch(r.URL.Path, -1)
-
-	if len(g) != 1 {
-		util.RespondWithError(w, http.StatusBadRequest, "Invalid URI")
-		return
-	}
 
 	u := data.User{}
 
-	Uuid, err := guuid.Parse(g[0][1])
+	vars := mux.Vars(r)
+
+	Uuid, err := guuid.Parse(vars["uuid"])
 
 	u.Uuid = Uuid
 

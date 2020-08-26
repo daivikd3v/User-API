@@ -3,18 +3,20 @@ package handlers
 
 import (
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
-//RegisterRoutes registers routes to the appropriate handler functions on the ServeMux instance.
-func RegisterRoutes(handler *http.ServeMux) {
+//RegisterRoutes registers routes to the appropriate handler functions on the Mux Router instance.
+func RegisterRoutes(handler *mux.Router) {
 
 	homeHandler := GetHomeHandler()
 	userHandler := GetUserHandler()
 
-	handler.HandleFunc("/get/", homeHandler.get)
-	handler.HandleFunc("/post/", userHandler.post)
-	handler.HandleFunc("/put/", userHandler.put)
-	handler.HandleFunc("/delete/", userHandler.delete)
-	handler.HandleFunc("/", homeHandler.index)
+	handler.HandleFunc("/get/", homeHandler.get).Methods(http.MethodGet)
+	handler.HandleFunc("/post/", userHandler.post).Methods(http.MethodPost)
+	handler.HandleFunc("/put/{uuid}", userHandler.put).Methods(http.MethodPut)
+	handler.HandleFunc("/delete/{uuid}", userHandler.delete).Methods(http.MethodDelete)
+	handler.HandleFunc("/", homeHandler.index).Methods(http.MethodGet)
 
 }

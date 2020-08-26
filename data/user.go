@@ -88,7 +88,10 @@ func (u *User) Delete() error {
 	if !ok {
 		return errors.New("user with UUID doesn't exist")
 	}
-	u = user
+	u.Name = user.Name
+	u.Age = user.Age
+	u.Percentage = user.Percentage
+	u.Time = user.Time
 	delete(users, u.Uuid)
 	return nil
 }

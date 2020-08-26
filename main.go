@@ -7,10 +7,11 @@ import (
 	"time"
 
 	"github.com/daivikd3v/User-API/handlers"
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	router := http.NewServeMux()
+	router := mux.NewRouter()
 
 	handlers.RegisterRoutes(router)
 
