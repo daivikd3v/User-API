@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"net/http"
-
-	"github.com/daivikd3v/User-API/util"
+	"github.com/gin-gonic/gin"
 )
 
 //Home Handler Struct
@@ -16,17 +14,15 @@ func GetHomeHandler() *Home {
 }
 
 //Index - returns a welcome message in JSON format.
-func (home Home) index(w http.ResponseWriter, r *http.Request) {
-	response := map[string]string{
-		"message": "Welcome to home page route",
-	}
-	util.RespondWithJSON(w, http.StatusOK, response)
+func (home Home) index(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "You have reached the home page route",
+	})
 }
 
 //Get - returns a message indicating a get route has reached.
-func (home Home) get(w http.ResponseWriter, r *http.Request) {
-	response := map[string]string{
+func (home Home) get(c *gin.Context) {
+	c.JSON(200, gin.H{
 		"message": "You have reached the get route",
-	}
-	util.RespondWithJSON(w, http.StatusOK, response)
+	})
 }

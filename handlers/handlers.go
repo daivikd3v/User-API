@@ -2,21 +2,19 @@
 package handlers
 
 import (
-	"net/http"
-
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 )
 
-//RegisterRoutes registers routes to the appropriate handler functions on the Mux Router instance.
-func RegisterRoutes(handler *mux.Router) {
+//RegisterRoutes registers routes to the appropriate handler functions on the Gin Engine instance.
+func RegisterRoutes(handler *gin.Engine) {
 
 	homeHandler := GetHomeHandler()
 	userHandler := GetUserHandler()
+	handler.GET("/get/", homeHandler.get)
+	handler.GET("/", homeHandler.index)
 
-	handler.HandleFunc("/get/", homeHandler.get).Methods(http.MethodGet)
-	handler.HandleFunc("/post/", userHandler.post).Methods(http.MethodPost)
-	handler.HandleFunc("/put/{uuid}", userHandler.put).Methods(http.MethodPut)
-	handler.HandleFunc("/delete/{uuid}", userHandler.delete).Methods(http.MethodDelete)
-	handler.HandleFunc("/", homeHandler.index).Methods(http.MethodGet)
+	handler.POST("/post/", userHandler.post)
+	handler.PUT("/put/:uuid", userHandler.put)
+	handler.DELETE("/delete/:uuid", userHandler.delete)
 
 }

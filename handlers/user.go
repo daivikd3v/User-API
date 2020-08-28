@@ -1,13 +1,10 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 
-	"github.com/gorilla/mux"
-
 	"github.com/daivikd3v/User-API/data"
-	"github.com/daivikd3v/User-API/util"
+	"github.com/gin-gonic/gin"
 	guuid "github.com/google/uuid"
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -22,101 +19,147 @@ func GetUserHandler() *User {
 }
 
 //Post creates a users in memory from the request.
-func (user User) post(w http.ResponseWriter, r *http.Request) {
+func (user User) post(c *gin.Context) {
 
-	u, err := unmarshal(r)
+	u, err := unmarshal(c)
 
 	if err != nil {
-		util.RespondWithError(w, http.StatusBadRequest, err.Error())
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"success": false,
+				"error":   err.Error(),
+			})
 		return
 	}
 
 	err = validate(u)
 
 	if err != nil {
-		util.RespondWithError(w, http.StatusBadRequest, err.Error())
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"success": false,
+				"error":   err.Error(),
+			})
 		return
 	}
 
 	u.Create()
 
-	util.RespondWithStatus(w, http.StatusOK, true, u)
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"success": true,
+			"data":    u,
+		})
 }
 
 //Put updates an already existing user in memory from the request.
-func (user User) put(w http.ResponseWriter, r *http.Request) {
+func (user User) put(c *gin.Context) {
 
-	vars := mux.Vars(r)
-
-	u, err := unmarshal(r)
+	u, err := unmarshal(c)
 
 	if err != nil {
-		util.RespondWithError(w, http.StatusBadRequest, err.Error())
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"success": false,
+				"error":   err.Error(),
+			})
 		return
 	}
 
 	err = validate(u)
 
 	if err != nil {
-		util.RespondWithError(w, http.StatusBadRequest, err.Error())
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"success": false,
+				"error":   err.Error(),
+			})
 		return
 	}
 
-	u.Uuid, err = guuid.Parse(vars["uuid"])
+	u.Uuid, err = guuid.Parse(c.Param("uuid"))
 
 	if err != nil {
-		util.RespondWithError(w, http.StatusBadRequest, "Invalid UUID")
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"success": false,
+				"error":   "Invalid UUID",
+			})
 		return
 	}
 
 	err = u.Update()
 
 	if err != nil {
-		util.RespondWithError(w, http.StatusBadRequest, err.Error())
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"success": false,
+				"error":   err.Error(),
+			})
 		return
 	}
 
-	util.RespondWithStatus(w, http.StatusOK, true, u)
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"success": true,
+			"data":    u,
+		})
 }
 
 //Delete deletes a user from UUID in the request
-func (user User) delete(w http.ResponseWriter, r *http.Request) {
+func (user User) delete(c *gin.Context) {
 
 	u := data.User{}
 
-	vars := mux.Vars(r)
-
-	Uuid, err := guuid.Parse(vars["uuid"])
+	Uuid, err := guuid.Parse(c.Param("uuid"))
 
 	u.Uuid = Uuid
 
 	if err != nil {
-		util.RespondWithError(w, http.StatusBadRequest, "Invalid UUID")
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"success": false,
+				"error":   "Invalid UUID",
+			})
 		return
 	}
 
 	err = u.Delete()
 
 	if err != nil {
-		util.RespondWithError(w, http.StatusBadRequest, err.Error())
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"success": false,
+				"error":   err.Error(),
+			})
 		return
 	}
 
-	util.RespondWithStatus(w, http.StatusOK, true, u)
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"success": true,
+			"data":    u,
+		})
 }
 
 // Decode json in user struct
-func unmarshal(r *http.Request) (*data.User, error) {
+func unmarshal(c *gin.Context) (*data.User, error) {
 	var u data.User
 
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&u); err != nil {
-		return nil, err
-	}
+	err := c.ShouldBindJSON(&u)
 
-	defer r.Body.Close()
-
-	return &u, nil
+	return &u, err
 }
 
 //Validate request parameters and return error
