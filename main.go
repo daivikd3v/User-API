@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/daivikd3v/User-API/handlers"
+	muxhandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -15,9 +16,13 @@ func main() {
 
 	handlers.RegisterRoutes(router)
 
+	originsOk := muxhandlers.AllowedOrigins([]string{"*"})
+	headersOk := muxhandlers.AllowedHeaders([]string{"Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"})
+	methodsOk := muxhandlers.AllowedMethods([]string{http.MethodGet, http.MethodHead, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions})
+
 	s := &http.Server{
 		Addr:         ":8080",
-		Handler:      router,
+		Handler:      muxhandlers.CORS(originsOk, headersOk, methodsOk)(router),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
